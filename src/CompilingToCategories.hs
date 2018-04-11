@@ -2,6 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module CompilingToCategories where
 
@@ -21,20 +22,17 @@ class Category k => Cartesian k where
   exr :: (a, b) `k` b
   
 -- How to generalize () for any category?
-class Category k => Terminal k where
-  it :: a `k` ()
+class Category k => Terminal k u | k -> u where
+  it :: a `k` u
   
 class Cartesian k => Closed k where
   applyC :: ((a -> b), a) `k` b
   curry :: ((a, b) `k` c) -> (a `k` (b -> c))
   uncurry :: (a `k` (b -> c)) -> ((a, b)  `k` c)
   
-class Terminal k => ConstCat k b where
-  unitArrow :: b -> (() `k` b)
- 
-const :: ConstCat k b => b -> (a `k` b)
-const b = unitArrow b . it
- 
+class ConstCat k where
+  unitArrow :: b -> (a `k` b)
+  
 class Cartesian k => BoolCat k where
   notC :: Bool `k` Bool
   andC, orC :: (Bool, Bool) `k` Bool
@@ -58,7 +56,7 @@ instance Cartesian (->) where
   exl = \(a, b) -> a
   exr = \(a, b) -> b
   
-instance Terminal (->) where
+instance Terminal (->) () where
   it = \a -> ()
   
 instance Closed (->) where
@@ -66,8 +64,8 @@ instance Closed (->) where
   curry f = \a b -> f (a, b)
   uncurry f = \(a, b) -> f a b
 
-instance ConstCat (->) b where
-  unitArrow b = \() -> b
+instance ConstCat (->) where
+  unitArrow b = \_ -> b
   
 instance BoolCat (->) where
   notC = not

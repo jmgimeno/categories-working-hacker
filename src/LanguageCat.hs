@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -18,8 +19,8 @@ swap :: Cartesian k => (a, b) `k` (b, a)
 swap = exr |*| exl
     
 instance (Closed k
-         ,ConstCat k Int, NumCat k Int, OrdCat k Int
-         ,ConstCat k Bool, BoolCat k
+         ,ConstCat k, NumCat k Int, OrdCat k Int
+         , BoolCat k
          ) => Language k where
   here       = exl
   before f   = f . exr
@@ -28,14 +29,14 @@ instance (Closed k
     
   loop   f   = applyC . ( f |*| loop f)
     
-  int        = const
+  int        = unitArrow
   add a b    = addC . (a |*| b)
   mult a b   = mulC . (a |*| b)
   down a     = add a (int (-1))
   up a       = add a (int 1)
   gte a b    = gteC . (a |*| b)
     
-  bool       = const
+  bool       = unitArrow
   and a b    = andC . (a |*| b)
   or a b     = orC . (a |*| b)
   neg a      = notC . a
