@@ -1,14 +1,10 @@
 {-# LANGUAGE Rank2Types          #-}
-{-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators       #-}
 
--- After getting rid of mocks, shouldn't need these two below
--- {-# LANGUAGE FlexibleInstances   #-}
--- {-# LANGUAGE MonoLocalBinds      #-}
+module Compiling.Language where
 
-module Language where
-
-import Prelude hiding (and, or)
+import           Prelude
 
 class Language k where
   here   :: (a, h) `k` a
