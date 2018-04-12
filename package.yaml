@@ -11,18 +11,28 @@ extra-source-files:
 - ChangeLog.md
 - LICENSE
 
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+ghc-options: -Wall -Werror
 
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/jmgimeno/categories-working-hacker#readme>
+description: Please see the README on Github at <https://github.com/jmgimeno/categories-working-hacker#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- base >= 4.10 && < 4.11
 
 library:
   source-dirs: src
-  
+
+tests:
+  exercise-test-suite:
+    source-dirs: tests/tasty
+    main: Main.hs
+    dependencies:
+    - base        >= 4.10 && < 4.11
+    - tasty       >= 1.0 && < 1.1
+    - tasty-hunit >= 0.10 && < 0.11
+    - CategoriesWorkingHacker
+  hlint-code:
+    source-dirs: tests/hlint
+    main: Main.hs
+    dependencies:
+    - base        >= 4.10 && < 4.11
+    - hlint       >= 2.1  && < 2.2
