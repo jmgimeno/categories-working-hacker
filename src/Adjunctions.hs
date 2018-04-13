@@ -1,13 +1,16 @@
 {-# LANGUAGE DeriveFunctor          #-}
+{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures         #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE PolyKinds              #-}
 {-# LANGUAGE Rank2Types             #-}
 {-# LANGUAGE TypeOperators          #-}
+{-# LANGUAGE UndecidableInstances   #-}
 
 module Adjunctions where
 
+import           Control.Arrow
 import           Control.Monad
 
 class (Functor f, Functor g) => Adjunction f g | f -> g, g -> f where
@@ -69,3 +72,19 @@ instance Adjunction f g => Monad (g :.: f) where
   x >>= f = Comp1 (fmap (rightAdjunct (unComp1 . f)) (unComp1 x))
 
 type MyState s = ((->) s :.: (,) s)
+
+class PreservesCoproduct f where
+  extractCoproduct   :: f (Either a b) -> Either (f a) (f b)
+  introduceCoproduct :: Either (f a) (f b) -> f (Either a b)
+  
+class PreservesProduct f where
+  extractProduct    :: f (a, b) -> (f a, f b)
+  introduceProduct  :: (f a, f b) -> f (a, b)
+
+instance Adjunction f g => PreservesCoproduct f where
+  extractCoproduct   = rightAdjunct $ fmap Left . unit ||| fmap Right . unit
+  introduceCoproduct = fmap Left ||| fmap Right
+
+instance Adjunction f g => PreservesProduct g where
+  extractProduct   = fmap fst &&& fmap snd
+  introduceProduct = leftAdjunct $ counit . fmap fst &&& counit . fmap snd
