@@ -1,12 +1,10 @@
 {-# LANGUAGE DeriveFunctor          #-}
-{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures         #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE PolyKinds              #-}
 {-# LANGUAGE Rank2Types             #-}
 {-# LANGUAGE TypeOperators          #-}
-{-# LANGUAGE UndecidableInstances   #-}
 
 module Adjunctions where
 
@@ -73,18 +71,16 @@ instance Adjunction f g => Monad (g :.: f) where
 
 type MyState s = ((->) s :.: (,) s)
 
-class PreservesCoproduct f where
-  extractCoproduct   :: f (Either a b) -> Either (f a) (f b)
-  introduceCoproduct :: Either (f a) (f b) -> f (Either a b)
-  
-class PreservesProduct f where
-  extractProduct    :: f (a, b) -> (f a, f b)
-  introduceProduct  :: (f a, f b) -> f (a, b)
+-- Left adjoints preserve coproducts
+extractCoproduct :: Adjunction f g => f (Either a b) -> Either (f a) (f b)
+extractCoproduct = rightAdjunct $ fmap Left . unit ||| fmap Right . unit
 
-instance Adjunction f g => PreservesCoproduct f where
-  extractCoproduct   = rightAdjunct $ fmap Left . unit ||| fmap Right . unit
-  introduceCoproduct = fmap Left ||| fmap Right
+introduceCoproduct :: Functor f => Either (f a) (f b) -> f (Either a b)
+introduceCoproduct = fmap Left ||| fmap Right
 
-instance Adjunction f g => PreservesProduct g where
-  extractProduct   = fmap fst &&& fmap snd
-  introduceProduct = leftAdjunct $ counit . fmap fst &&& counit . fmap snd
+-- Right adjoints preserve producs
+extractProduct :: Functor g => g (a, b) -> (g a, g b)
+extractProduct = fmap fst &&& fmap snd
+
+introduceProduct :: Adjunction f g  => (g a, g b) -> g (a, b)
+introduceProduct = leftAdjunct $ counit . fmap fst &&& counit . fmap snd
