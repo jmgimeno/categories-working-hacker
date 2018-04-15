@@ -1,8 +1,6 @@
 {-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MonoLocalBinds         #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE UndecidableInstances   #-}
@@ -66,7 +64,8 @@ instance Monad m => CatAdjunction (->) (Kleisli m) LeftK (RightK m) where
   catLeftAdjunct  f = RightK . runKleisli f . LeftK
   catRightAdjunct f = Kleisli $ unRightK . f . unLeftK
 
--- Defining Identity to not depend on mtl
+-- The functor in Data.Functor.Identity gives problems due to 
+-- its Functor instances overlaps with the EndoFunctor one.
 
 newtype Identity a = Identity { runIdentity :: a }
 
